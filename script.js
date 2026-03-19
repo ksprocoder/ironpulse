@@ -3,6 +3,10 @@
 ═══════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Supabase Configuration
+  const SUPABASE_URL = 'https://otbffeyswsfhbxnqmnaa.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_cYkIPH3uIduhgJfjwKTBGg_PY3mxy8O';
+  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
   /* ─────────────────────────────────────────
      1.  NAVBAR — sticky + active link
@@ -193,19 +197,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!ok) { shake(form); return; }
 
-    // Simulate send
+    // Send to Supabase
     btnText.hidden = true;
     btnLoad.hidden = false;
     submitB.disabled = true;
 
-    await sleep(1800);
+    try {
+      if (!supabase) throw new Error('Supabase client not initialized');
 
-    btnText.hidden = false;
-    btnLoad.hidden = true;
-    submitB.disabled = false;
-    form.reset();
-    success.hidden = false;
-    setTimeout(() => { success.hidden = true; }, 6000);
+      const formData = new FormData(form);
+      const data = {
+        first_name: formData.get('fname'),
+        last_name: formData.get('lname'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        interest: formData.get('interest'),
+        message: formData.get('msg'),
+      };
+
+      const { error } = await supabase.from('contacts').insert([data]);
+
+      if (error) throw error;
+
+      form.reset();
+      success.hidden = false;
+      setTimeout(() => { success.hidden = true; }, 6000);
+    } catch (err) {
+      console.error('Submission error:', err);
+      alert('Oops! Something went wrong. Please try again or call us directly.');
+    } finally {
+      btnText.hidden = false;
+      btnLoad.hidden = true;
+      submitB.disabled = false;
+    }
   });
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }

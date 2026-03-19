@@ -224,7 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { success.hidden = true; }, 6000);
     } catch (err) {
       console.error('Submission error:', err);
-      alert('Oops! Something went wrong. Please try again or call us directly.');
+      const msg = err.message || 'Check your internet connection or try again later.';
+      alert(`Oops! Something went wrong: ${msg}`);
     } finally {
       btnText.hidden = false;
       btnLoad.hidden = true;
